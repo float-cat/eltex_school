@@ -19,6 +19,7 @@ WINDOWS createWindow(int count, int number)
     p = strrchr(windows.path, '/');
     if(p) *(p + 1) = 0;
     else windows.path[0] = 0;
+    windows.position = 0;
     windows.list.root = NULL;
     windows.list.prev = NULL;
     windows.list.count = 0;
@@ -43,11 +44,18 @@ WINDOWS resizewnds(WINDOWS *wnds, int count, int number)
 
 void printFileList(WINDOWS *wnds)
 {
+    int idx;
     struct fileListNode *p = wnds->list.root;
+    idx = 0;
     while(p!=NULL)
     {
+        if(wnds->position == idx)
+            wattron(wnds->subwnd, A_REVERSE);
         wprintw(wnds->subwnd, "%c%s\n", (p->type == 4)?'/':' ', p->name);
+        if(wnds->position == idx)
+            wattroff(wnds->subwnd, A_REVERSE);
         p = p->next;
+        idx++;
     }
     wrefresh(wnds->subwnd);
 }

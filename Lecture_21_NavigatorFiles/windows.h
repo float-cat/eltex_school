@@ -20,6 +20,7 @@ struct windows
     WINDOW * subwnd;
     char path[PATH_MAX+1];
     struct fileList list;
+    int position;
 };
 
 typedef struct windows WINDOWS;
