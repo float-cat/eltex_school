@@ -3,6 +3,18 @@
 
 #include "fileList.h"
 
+
+struct fileListNode * getItem(struct fileList *list, int idx)
+{
+    struct fileListNode *p = list->root;
+    while(p!=NULL && idx > 0)
+    {
+        p = p->next;
+        idx--;
+    }
+    return p;
+}
+
 void addNewItem(struct fileList *list, char *buf, unsigned char type)
 {
     struct fileListNode *newNode;
@@ -33,6 +45,9 @@ void clearFileList(struct fileList *list)
         free(p);
         p = n;
     }
+    list->root = NULL;
+    list->prev = NULL;
+    list->count = 0;
 }
 
 void getFileList(struct fileList *list, const char *path)

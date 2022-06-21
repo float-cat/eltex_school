@@ -3,6 +3,36 @@
 
 #include "windows.h"
 
+
+void openDirectory(WINDOWS *wnds, const char *name)
+{
+    int len;
+    int lenOfName;
+    int idx;
+    char *p;
+    if((len = strlen(wnds->path)) > 1)
+    {
+        if(strcmp("..", name) == 0)
+        {
+            wnds->path[len-1] = 0;
+            p = strrchr(wnds->path, '/');
+            if(p) *(p + 1) = 0;
+            printf("[%s]", wnds->path);
+        }
+        else
+        {
+            idx = len;
+            lenOfName = strlen(name);
+            for(; idx < len + lenOfName; idx++)
+            {
+                wnds->path[idx] = name[idx - len];
+            }
+            wnds->path[idx] = '/';
+            wnds->path[idx+1] = 0;
+        }
+    }
+}
+
 WINDOWS createWindow(int count, int number)
 {
     struct winsize size;
@@ -46,6 +76,7 @@ void printFileList(WINDOWS *wnds)
 {
     int idx;
     struct fileListNode *p = wnds->list.root;
+    wmove(wnds->subwnd, 0, 0);
     idx = 0;
     while(p!=NULL)
     {

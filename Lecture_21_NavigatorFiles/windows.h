@@ -27,6 +27,8 @@ typedef struct windows WINDOWS;
 
 extern WINDOWS wnds[2];
 
+void openDirectory(WINDOWS *wnds, const char *name);
+
 WINDOWS createWindow(int count, int number);
 
 WINDOWS resizewnds(WINDOWS *wnds, int count, int number);

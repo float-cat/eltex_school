@@ -7,7 +7,7 @@
 
 struct fileListNode
 {
-    char name[255];
+    char name[100];
     unsigned char type;
     struct fileListNode *next;
 };
@@ -18,6 +18,8 @@ struct fileList
     struct fileListNode *prev;
     int count;
 };
+
+struct fileListNode * getItem(struct fileList *list, int idx);
 
 void addNewItem(struct fileList *list, char *buf, unsigned char type);
 
