@@ -15,13 +15,15 @@ void process(void)
         if(ch == 115 || ch == 66)
         {
             wmove(wnds[wndidx].subwnd, 0, 0);
-            wnds[wndidx].position++;
+            if(wnds[wndidx].list.count - 1 > wnds[wndidx].position)
+                wnds[wndidx].position++;
             printFileList(&(wnds[wndidx]));
         }
         else if(ch == 119 || ch == 65)
         {
             wmove(wnds[wndidx].subwnd, 0, 0);
-            wnds[wndidx].position--;
+            if(wnds[wndidx].position > 0)
+                wnds[wndidx].position--;
             printFileList(&(wnds[wndidx]));
         }
         else if(ch == 10)
@@ -30,8 +32,10 @@ void process(void)
             p = getItem(&(wnds[wndidx].list), wnds[wndidx].position);
             if(p->type == 4)
             {
+                wclear(wnds[wndidx].subwnd);
                 openDirectory(&(wnds[wndidx]), p->name);
                 getFileList(&(wnds[wndidx].list), wnds[wndidx].path);
+                wnds[wndidx].position = 0;
                 printFileList(&(wnds[wndidx]));
             }
         }
@@ -39,7 +43,6 @@ void process(void)
         {
             wndidx = (wndidx + 1) % 2;
         }
-        printf("[%d]", ch);
     }
 }
 

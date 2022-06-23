@@ -10,26 +10,26 @@ void openDirectory(WINDOWS *wnds, const char *name)
     int lenOfName;
     int idx;
     char *p;
-    if((len = strlen(wnds->path)) > 1)
+    len = strlen(wnds->path);
+    if(strcmp("..", name) == 0)
     {
-        if(strcmp("..", name) == 0)
+        if(len > 1)
         {
             wnds->path[len-1] = 0;
             p = strrchr(wnds->path, '/');
             if(p) *(p + 1) = 0;
-            printf("[%s]", wnds->path);
         }
-        else
+    }
+    else
+    {
+        idx = len;
+        lenOfName = strlen(name);
+        for(; idx < len + lenOfName; idx++)
         {
-            idx = len;
-            lenOfName = strlen(name);
-            for(; idx < len + lenOfName; idx++)
-            {
-                wnds->path[idx] = name[idx - len];
-            }
-            wnds->path[idx] = '/';
-            wnds->path[idx+1] = 0;
+            wnds->path[idx] = name[idx - len];
         }
+        wnds->path[idx] = '/';
+        wnds->path[idx+1] = 0;
     }
 }
 
@@ -74,7 +74,11 @@ WINDOWS resizewnds(WINDOWS *wnds, int count, int number)
 
 void printFileList(WINDOWS *wnds)
 {
-    int idx;
+    int idx, i;
+    struct stat statBuf;
+    int filesize;
+    char path[PATH_MAX + 1];
+    int len, lenOfName;
     struct fileListNode *p = wnds->list.root;
     wmove(wnds->subwnd, 0, 0);
     idx = 0;
@@ -82,7 +86,24 @@ void printFileList(WINDOWS *wnds)
     {
         if(wnds->position == idx)
             wattron(wnds->subwnd, A_REVERSE);
-        wprintw(wnds->subwnd, "%c%s\n", (p->type == 4)?'/':' ', p->name);
+        wprintw(wnds->subwnd, "%c%s", (p->type == 4)?'/':' ', p->name);
+        if(p->type == 8)
+        {
+            strcpy(path, wnds->path);
+            len = strlen(path);
+            i = len;
+            lenOfName = strlen(p->name);
+            for(; i < len + lenOfName; i++)
+            {
+                path[i] = p->name[i - len];
+            }
+            path[i] = 0;    
+            stat(path, &statBuf);
+            filesize = statBuf.st_size;
+            wprintw(wnds->subwnd, "\t(%d)\n", filesize);
+        }
+        else
+            wprintw(wnds->subwnd, "\n");
         if(wnds->position == idx)
             wattroff(wnds->subwnd, A_REVERSE);
         p = p->next;
