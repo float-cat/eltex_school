@@ -14,16 +14,24 @@ void process(void)
     {
         if(ch == 115 || ch == 66)
         {
-            wmove(wnds[wndidx].subwnd, 0, 0);
             if(wnds[wndidx].list.count - 1 > wnds[wndidx].position)
                 wnds[wndidx].position++;
+            if((wnds[wndidx].page+1) * wnds[wndidx].pageSize <= wnds[wndidx].position)
+            {
+                wclear(wnds[wndidx].subwnd);
+                wnds[wndidx].page++;
+            }
             printFileList(&(wnds[wndidx]));
         }
         else if(ch == 119 || ch == 65)
         {
-            wmove(wnds[wndidx].subwnd, 0, 0);
             if(wnds[wndidx].position > 0)
                 wnds[wndidx].position--;
+            if(wnds[wndidx].page * wnds[wndidx].pageSize > wnds[wndidx].position)
+            {
+                wclear(wnds[wndidx].subwnd);
+                wnds[wndidx].page--;
+            }
             printFileList(&(wnds[wndidx]));
         }
         else if(ch == 10)

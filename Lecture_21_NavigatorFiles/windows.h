@@ -22,6 +22,8 @@ struct windows
     char path[PATH_MAX+1];
     struct fileList list;
     int position;
+    int page;
+    int pageSize;
 };
 
 typedef struct windows WINDOWS;

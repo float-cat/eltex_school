@@ -50,6 +50,8 @@ WINDOWS createWindow(int count, int number)
     if(p) *(p + 1) = 0;
     else windows.path[0] = 0;
     windows.position = 0;
+    windows.page = 0;
+    windows.pageSize = size.ws_row - 2;
     windows.list.root = NULL;
     windows.list.prev = NULL;
     windows.list.count = 0;
@@ -67,6 +69,7 @@ WINDOWS resizewnds(WINDOWS *wnds, int count, int number)
     box(wnds->wnd, '|', '-');
     wnds->subwnd = derwin(wnds->wnd, size.ws_row-2, size.ws_col/count-2, 1, 1);
     wrefresh(wnds->subwnd);
+    wnds->pageSize = size.ws_row - 2;
     printFileList(wnds);
     wrefresh(wnds->wnd);
     return *wnds;
@@ -79,11 +82,21 @@ void printFileList(WINDOWS *wnds)
     int filesize;
     char path[PATH_MAX + 1];
     int len, lenOfName;
+    int start;
     struct fileListNode *p = wnds->list.root;
     wmove(wnds->subwnd, 0, 0);
     idx = 0;
+    start = wnds->page * wnds->pageSize;
     while(p!=NULL)
     {
+        if(idx < start)
+        {
+            p = p->next;
+            idx++;
+            continue;
+        }
+        if(idx >= start + wnds->pageSize)
+            break;
         if(wnds->position == idx)
             wattron(wnds->subwnd, A_REVERSE);
         wprintw(wnds->subwnd, "%c%s", (p->type == 4)?'/':' ', p->name);
