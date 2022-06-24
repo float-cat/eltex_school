@@ -24,6 +24,8 @@ struct windows
     int position;
     int page;
     int pageSize;
+    int rowWidth;
+    int rowStart;
 };
 
 typedef struct windows WINDOWS;

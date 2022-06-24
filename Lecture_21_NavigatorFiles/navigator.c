@@ -7,12 +7,16 @@ WINDOWS wnds[2];
 
 void process(void)
 {
-    char ch;
+    int ch;
     int wndidx;
+    int newPosition;
+    int oldY;
+    MEVENT event;
     wndidx = 0;
-    while((ch = getch()) != 113)
+    oldY = 100000;
+    while((ch = wgetch(stdscr)) != 113)
     {
-        if(ch == 115 || ch == 66)
+        if(ch == 115 || ch == 258)
         {
             if(wnds[wndidx].list.count - 1 > wnds[wndidx].position)
                 wnds[wndidx].position++;
@@ -23,7 +27,7 @@ void process(void)
             }
             printFileList(&(wnds[wndidx]));
         }
-        else if(ch == 119 || ch == 65)
+        else if(ch == 119 || ch == 259)
         {
             if(wnds[wndidx].position > 0)
                 wnds[wndidx].position--;
@@ -51,6 +55,36 @@ void process(void)
         {
             wndidx = (wndidx + 1) % 2;
         }
+        else if(ch == KEY_MOUSE)
+        {
+            getmouse(&event);
+            move(event.y, event.x);
+            if(event.x > wnds[0].rowStart + wnds[0].rowWidth)
+                wndidx = 1;
+            else
+                wndidx = 0;
+            newPosition = wnds[wndidx].page * wnds[wndidx].pageSize + event.y - 1;
+            if(newPosition >= 0 && newPosition < wnds[wndidx].list.count)
+            {
+                struct fileListNode *p;
+                wnds[wndidx].position = newPosition;
+                if(event.y == oldY)
+                {
+                    p = getItem(&(wnds[wndidx].list), wnds[wndidx].position);
+                    if(p->type == 4)
+                    {
+                        wclear(wnds[wndidx].subwnd);
+                        openDirectory(&(wnds[wndidx]), p->name);
+                        getFileList(&(wnds[wndidx].list), wnds[wndidx].path);
+                        wnds[wndidx].position = 0;
+                        printFileList(&(wnds[wndidx]));
+                    }
+                }
+                else                    
+                    printFileList(&(wnds[wndidx]));
+                oldY = event.y;
+            }
+        }
     }
 }
 
@@ -60,6 +94,8 @@ void init(void)
     noecho();
     signal(SIGWINCH, sig_winch);
     cbreak();
+    keypad(stdscr, 1); /* DBG */
+    mousemask(BUTTON1_CLICKED, NULL); /* DBG */
     curs_set(0);
     refresh();
     wnds[0] = createWindow(2, 0);

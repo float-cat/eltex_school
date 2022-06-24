@@ -55,6 +55,8 @@ WINDOWS createWindow(int count, int number)
     windows.list.root = NULL;
     windows.list.prev = NULL;
     windows.list.count = 0;
+    windows.rowWidth = size.ws_col/count - 2;
+    windows.rowStart = size.ws_col/count * number + 1;
     getFileList(&(windows.list), windows.path);
     return windows;
 }
@@ -69,7 +71,10 @@ WINDOWS resizewnds(WINDOWS *wnds, int count, int number)
     box(wnds->wnd, '|', '-');
     wnds->subwnd = derwin(wnds->wnd, size.ws_row-2, size.ws_col/count-2, 1, 1);
     wrefresh(wnds->subwnd);
+    wnds->rowWidth = size.ws_col/count - 2;
+    wnds->rowStart = size.ws_col/count * number + 1;
     wnds->pageSize = size.ws_row - 2;
+    wnds->page = wnds->position / wnds->pageSize;
     printFileList(wnds);
     wrefresh(wnds->wnd);
     return *wnds;
@@ -133,6 +138,9 @@ void sig_winch(int signo)
     resizeterm(size.ws_row, size.ws_col);
     resizewnds(&wnds[0], 2, 0);
     resizewnds(&wnds[1], 2, 1);
+    nodelay(stdscr, 1);
+    while (wgetch(stdscr) != ERR);
+    nodelay(stdscr, 0);
 }
 
 #endif /* _WINDOWS_C_ */
