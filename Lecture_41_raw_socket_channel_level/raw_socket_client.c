@@ -10,6 +10,24 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+unsigned short calc_checksum(void *buff, unsigned short size)
+{
+    unsigned short result = 0;
+    unsigned int tmp;
+    unsigned short *ptr = (unsigned short *)buff;
+    size /= 2;
+    unsigned int i = 0;
+    while(i < size)
+    {
+        tmp += *ptr;
+        i++;
+        ptr++;
+    }
+    tmp += tmp >> 16;
+    result = tmp & 0xFFFF;
+    return result;
+}
+
 struct mac_header /* 18 байт */
 {
     unsigned char dest_mac[6];
@@ -47,7 +65,7 @@ int main(void)
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     short port = htons(8888);
     short dest_port = htons(7777);
-    short len = htons(255);
+    short len = htons(217);
     short checksum = 0;
     sa.sll_family = AF_PACKET;
     sa.sll_protocol = htons(ETH_P_ALL);
@@ -65,9 +83,10 @@ int main(void)
     iph.header_size = 5;
     iph.packet_size = htons(255);
     iph.flags = 2;
-    iph.ttl = 255;
+    iph.ttl = 237;
     iph.protocol = 17;
     iph.dest_addr = inet_addr("192.168.1.5");
+    iph.source_addr = inet_addr("192.168.1.3");
     memcpy(buffer, &mach, 18);
     memcpy(buffer+18, &iph, sizeof(iph));
     memcpy(buffer+38, &port, sizeof(short));
@@ -75,8 +94,12 @@ int main(void)
     memcpy(buffer+42, &len, sizeof(short));
     memcpy(buffer+44, &checksum, sizeof(short));
     strcpy(buffer+46, "Hello, world!");
+    iph.checksum = calc_checksum(buffer+18, 217);
     sendto(sock, buffer, 255, 0, (struct sockaddr *)&sa, sizeof(struct sockaddr));
-    recvfrom(sock, buffer, 255, 0, (struct sockaddr *)&sa, &addr_len);
-    printf(buffer+46);
+    while(1)
+    {
+        recvfrom(sock, buffer, 255, 0, (struct sockaddr *)&sa, &addr_len);
+        printf(buffer+46);
+    }
     return 0;
 }
