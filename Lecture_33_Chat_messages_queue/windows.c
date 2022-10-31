@@ -6,7 +6,6 @@
 WINDOWS createWindow(int number)
 {
     struct winsize size;
-    ssize_t len;
     WINDOWS windows;
     ioctl(fileno(stdout), TIOCGWINSZ, (char *) &size);
     if(number == 0)

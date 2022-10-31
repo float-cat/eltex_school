@@ -5,10 +5,16 @@
 
 WINDOWS wnds[3];
 
-void send_message(char *buffer)
+void print_message(char *buffer)
 {
     /* DBG */
     wprintw(wnds[0].subwnd, "%s\n", buffer);
+    wrefresh(wnds[0].subwnd);
+}
+void print_int(int a)
+{
+    /* DBG */
+    wprintw(wnds[0].subwnd, "%d\n", a);
     wrefresh(wnds[0].subwnd);
 }
 
