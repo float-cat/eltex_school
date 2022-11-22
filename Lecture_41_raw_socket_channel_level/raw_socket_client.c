@@ -10,22 +10,16 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-unsigned short calc_checksum(void *buff, unsigned short size)
+#include <netinet/ip.h>
+
+unsigned short csum(unsigned short *buf, int nwords)
 {
-    unsigned short result = 0;
-    unsigned int tmp;
-    unsigned short *ptr = (unsigned short *)buff;
-    size /= 2;
-    unsigned int i = 0;
-    while(i < size)
-    {
-        tmp += *ptr;
-        i++;
-        ptr++;
-    }
-    tmp += tmp >> 16;
-    result = tmp & 0xFFFF;
-    return result;
+  unsigned long sum;
+  for(sum=0; nwords>0; nwords--)
+    sum += *buf++;
+  sum = (sum >> 16) + (sum &0xffff);
+  sum += (sum >> 16);
+  return (unsigned short)(~sum);
 }
 
 struct mac_header /* 18 байт */
@@ -36,7 +30,7 @@ struct mac_header /* 18 байт */
     unsigned short type;
 };
 
-struct ip_header
+/* struct ip_header
 {
     unsigned version : 4;
     unsigned header_size : 4;
@@ -51,16 +45,16 @@ struct ip_header
     unsigned short checksum;
     unsigned int source_addr;
     unsigned int dest_addr;
-};
+}; */
 
 int main(void)
 {
     struct sockaddr_ll sa;
     struct mac_header mach;
-    struct ip_header iph;
     unsigned char dmac[6] = {0x34, 0x01, 0x3E, 0x11, 0x45, 0xBC};
     unsigned char smac[6] = {0x74, 0xFF, 0x71, 0xF4, 0xB1, 0xE4};
-    int opt = 1;
+    int opt = 1;    
+    const int *val = &opt;
     char buffer[255];
     int sock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     short port = htons(8888);
@@ -71,30 +65,42 @@ int main(void)
     sa.sll_protocol = htons(ETH_P_ALL);
     sa.sll_ifindex = htonl(3);
     sa.sll_pkttype = PACKET_OTHERHOST;
-    setsockopt(sock, SOL_SOCKET, IP_HDRINCL, &opt, sizeof(opt));
+    setsockopt(sock, IPPROTO_IP, IP_HDRINCL, val, sizeof(opt));
     int addr_len = sizeof(struct sockaddr_ll);
+
+    /* Ethernet header */
     memset((char *)&mach, 0, 18);
     memcpy(&(mach.dest_mac), dmac, 6);
     memcpy(&(mach.source_mac), smac, 6);
     mach.label = 0;
     mach.type = 0x0800;
-    memset((char *)&iph, 0, sizeof(iph));
-    iph.version = 4;
-    iph.header_size = 5;
-    iph.packet_size = htons(255);
-    iph.flags = 2;
-    iph.ttl = 237;
-    iph.protocol = 17;
-    iph.dest_addr = inet_addr("192.168.1.5");
-    iph.source_addr = inet_addr("192.168.1.3");
     memcpy(buffer, &mach, 18);
-    memcpy(buffer+18, &iph, sizeof(iph));
+
+    /* IP header */
+	struct iphdr *iph = (struct iphdr *) buffer;
+	iph->version = 4;
+    iph->ihl = 5;
+	iph->tos = 0;
+    iph->tot_len = htons(237);
+    iph->id = htons(12345);
+	iph->frag_off = 0;
+	iph->ttl = 64;
+	iph->protocol = IPPROTO_UDP;
+    iph->check = 0;
+	iph->daddr = inet_addr("192.168.1.5");
+    iph->saddr = inet_addr("192.168.1.7");
+
+    /* UDP header */
     memcpy(buffer+38, &port, sizeof(short));
     memcpy(buffer+40, &dest_port, sizeof(short));
     memcpy(buffer+42, &len, sizeof(short));
     memcpy(buffer+44, &checksum, sizeof(short));
+
+    /* Data block */
     strcpy(buffer+46, "Hello, world!");
-    iph.checksum = calc_checksum(buffer+18, 217);
+
+    /* Calc checksum for IP */
+    iph->check = csum(buffer+18, 237);
     sendto(sock, buffer, 255, 0, (struct sockaddr *)&sa, sizeof(struct sockaddr));
     while(1)
     {

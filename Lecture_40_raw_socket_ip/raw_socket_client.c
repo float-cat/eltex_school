@@ -28,8 +28,8 @@ int main(void)
     unsigned int addr_len = sizeof(struct sockaddr);
     /* IP header */
 	struct iphdr *iph = (struct iphdr *) buffer;
-	iph->ihl = 5;
 	iph->version = 4;
+    iph->ihl = 5;
 	iph->tos = 0;
 	iph->frag_off = 0;
 	iph->ttl = 64;
