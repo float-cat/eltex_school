@@ -27,14 +27,14 @@ int main(void)
     memset(buffer, 0, sizeof(buffer));
     unsigned int addr_len = sizeof(struct sockaddr);
     /* IP header */
-	struct iphdr *iph = (struct iphdr *) buffer;
-	iph->version = 4;
+    struct iphdr *iph = (struct iphdr *) buffer;
+    iph->version = 4;
     iph->ihl = 5;
-	iph->tos = 0;
-	iph->frag_off = 0;
-	iph->ttl = 64;
-	iph->protocol = IPPROTO_UDP;
-	iph->daddr = sa.sin_addr.s_addr;
+    iph->tos = 0;
+    iph->frag_off = 0;
+    iph->ttl = 64;
+    iph->protocol = IPPROTO_UDP;
+    iph->daddr = sa.sin_addr.s_addr;
 
     /* UDP header */
     memcpy(buffer+20, &port, sizeof(short));

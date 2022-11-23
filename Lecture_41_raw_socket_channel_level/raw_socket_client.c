@@ -77,17 +77,17 @@ int main(void)
     memcpy(buffer, &mach, 18);
 
     /* IP header */
-	struct iphdr *iph = (struct iphdr *) buffer;
-	iph->version = 4;
+    struct iphdr *iph = (struct iphdr *) buffer;
+    iph->version = 4;
     iph->ihl = 5;
-	iph->tos = 0;
+    iph->tos = 0;
     iph->tot_len = htons(237);
     iph->id = htons(12345);
-	iph->frag_off = 0;
-	iph->ttl = 64;
-	iph->protocol = IPPROTO_UDP;
+    iph->frag_off = 0;
+    iph->ttl = 64;
+    iph->protocol = IPPROTO_UDP;
     iph->check = 0;
-	iph->daddr = inet_addr("192.168.1.5");
+    iph->daddr = inet_addr("192.168.1.5");
     iph->saddr = inet_addr("192.168.1.7");
 
     /* UDP header */
