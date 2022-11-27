@@ -4,13 +4,19 @@ C90 := -std=gnu90 -pedantic
 WRN := -Wall -Wextra
 LIBS :=
 
-all: server1 client1 server_udp client_udp server_tcp client_tcp
+all: server1 client1 server2 client2 server_udp client_udp server_tcp client_tcp
 
 server1: server1.c
 		$(GCC) server1.c -o server1 $(C90) $(WRN) $(LIBS)
 
 client1: client1.c
 		$(GCC) client1.c -o client1 $(C90) $(WRN) $(LIBS)
+
+server2: server2.c
+		$(GCC) server2.c -o server2 $(C90) $(WRN) $(LIBS)
+
+client2: client2.c
+		$(GCC) client2.c -o client2 $(C90) $(WRN) $(LIBS)
 
 server_udp: server_udp.c
 		$(GCC) server_udp.c -o server_udp $(C90) $(WRN) $(LIBS)

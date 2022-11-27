@@ -15,7 +15,7 @@ int main(void)
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     int opt = 1;
     sa.sin_family = AF_INET;
-    sa.sin_addr.s_addr = htonl(INADDR_ANY); /* inet_addr("0.0.0.0"); */
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
     sa.sin_port = htons(7777);
     int addr_len = sizeof(struct sockaddr);
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
