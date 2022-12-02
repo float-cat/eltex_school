@@ -3,6 +3,7 @@
 
 #include "client.h"
 
+sem_t *sem = 0;
 int shm = 0;
 int last_id = -1;
 message_buf *addr;
@@ -21,25 +22,34 @@ void init_client(int userid, char *username)
         perror("ftruncate");
         return;
     }
+    if ( (sem = sem_open(SEMAPHORE_OBJECT_NAME, msgflg, 0777, 0)) == SEM_FAILED ) {
+        perror("sem_open");
+        return;
+    }
+    sem_post(sem);
     usr_id = userid;
     strcpy(usr_name, username);
+    sem_wait(sem);
     addr = mmap(0, SHARED_MEMORY_OBJECT_SIZE, PROT_WRITE|PROT_READ, MAP_SHARED, shm, 0);
     if ( addr == (message_buf *)-1 ) {
         perror("mmap");
         return;
     }
     addr->m_user_name[0] = 0;
+    sem_post(sem);
     pthread_create(&thrd, 0, recv_handler, NULL);
 }
 
 void finalize_client(void)
 {
     shm_unlink(SHARED_MEMORY_OBJECT_NAME);
+    sem_close(sem);
 }
 
 void send_message(char *message)
 {
     message_buf *sbuf, *tmp;
+    sem_wait(sem);
     if(addr->m_user_name[0] == 0)
     {
         addr->m_msg_id = 0;
@@ -58,6 +68,7 @@ void send_message(char *message)
         strcpy(sbuf->m_text, message);
         sbuf->next = NULL;
     }
+    sem_post(sem);
 }
 
 void recv_message(char *message)
