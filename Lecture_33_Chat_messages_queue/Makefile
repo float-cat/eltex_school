@@ -7,7 +7,7 @@ HEADERS2 := chat.h client.h windows.h
 OBJS2 := *.o
 GCC := gcc
 DEL := rm -f
-C90 := -std=gnu90 -pedantic
+C90 := -std=gnu90 -pedantic -fno-stack-protector
 WRN := -Wall -Wextra
 LIBS := -lncurses -lpthread
 

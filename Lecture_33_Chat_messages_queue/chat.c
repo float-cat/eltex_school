@@ -4,18 +4,22 @@
 #include "chat.h"
 
 WINDOWS wnds[3];
+pthread_mutex_t mtx;
 
 void print_message(char *buffer)
 {
-    /* DBG */
+    pthread_mutex_lock(&mtx);
     wprintw(wnds[0].subwnd, "%s\n", buffer);
     wrefresh(wnds[0].subwnd);
+    pthread_mutex_unlock(&mtx);
 }
 void print_int(int a)
 {
     /* DBG */
+    pthread_mutex_lock(&mtx);
     wprintw(wnds[0].subwnd, "%d\n", a);
     wrefresh(wnds[0].subwnd);
+    pthread_mutex_unlock(&mtx);
 }
 
 void process(void)
@@ -34,7 +38,9 @@ void process(void)
             send_message(buffer);
             bufferidx = 0;
             buffer[0] = 0;
+            pthread_mutex_lock(&mtx);
             wclear(wnds[2].subwnd);
+            pthread_mutex_unlock(&mtx);
         }
         else
         {
@@ -42,8 +48,10 @@ void process(void)
             buffer[bufferidx] = ch;
             bufferidx++;
             buffer[bufferidx] = 0;
-        }
-    	wrefresh(wnds[2].subwnd);
+        }        
+        pthread_mutex_lock(&mtx);
+    	wrefresh(wnds[2].subwnd);        
+        pthread_mutex_unlock(&mtx);
     }
 }
 

@@ -62,8 +62,10 @@ void *recv_handler(void *arg)
         return arg;
     while(1)
     {
+        usleep(500000);
         recv_message(message);
         print_message(message);
+        
     }
     return NULL;
 }
